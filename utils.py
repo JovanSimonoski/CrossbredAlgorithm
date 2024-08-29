@@ -217,7 +217,7 @@ def check_consistency(system_polynomials):
     return True
 
 
-def solve_linear_system(k_parameter, solution, system_polynomials, num_variables):
+def solve_linear_system(k_parameter, solution, system_polynomials, num_variables, answer):
     if not check_consistency(system_polynomials):
         return
 
@@ -241,11 +241,12 @@ def solve_linear_system(k_parameter, solution, system_polynomials, num_variables
 
         if all(val == 0 for val in s):
             return
+        if s == answer:
+            print('\nGOT THE CORRECT SOLUTION:')
+            print(s)
+            print(answer)
 
-        print('\nGOT THE SOLUTION:')
-        print(s)
-
-        exit(0)
+            exit(0)
     except ValueError:
         pass
 

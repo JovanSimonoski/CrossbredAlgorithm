@@ -1,16 +1,10 @@
 def parse_input():
-    choice = input('Would you like to try an example(0) or an actual challenge(1)? 0, 1: ')
     input_list = []
-    if choice == '1':
-        with open(f'example_input/challenge-1-55-0', 'r') as file:
-            for line in file:
-                input_list.append(line.strip())
-    elif choice == '0':
-        n = input('How many variables? 10, 15, 20 : ')
-        seed = input('Which seed do you want to try? 0, 1, 2, 3, 4 : ')
-        with open(f'example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}', 'r') as file:
-            for line in file:
-                input_list.append(line.strip())
+    n = input('How many variables? 10, 15, 20 : ')
+    seed = input('Which seed do you want to try? 0, 1, 2, 3, 4 : ')
+    with open(f'example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}', 'r') as file:
+        for line in file:
+            input_list.append(line.strip())
 
     input_separator_index = input_list.index('*********************')
 
@@ -35,4 +29,15 @@ def parse_input():
     degree = int(var_val['degree'])
     k = int(var_val['k'])
 
-    return num_variables, degree, k, eq
+    answer_tmp = []
+    with open(f'example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}-answer', 'r') as file:
+        for line in file:
+            answer_tmp = line.strip()[1:-1]
+
+    answer_tmp = answer_tmp.split(', ')
+
+    answer = []
+    for a in answer_tmp:
+        answer.append(int(a))
+
+    return num_variables, degree, k, eq, answer
