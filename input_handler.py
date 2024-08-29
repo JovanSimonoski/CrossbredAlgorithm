@@ -35,16 +35,4 @@ def parse_input():
     degree = int(var_val['degree'])
     k = int(var_val['k'])
 
-    answer_tmp = []
-
-    with open(f'example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}-answer', 'r') as file:
-        for line in file:
-            answer_tmp = line.strip()[1:-1]
-
-    answer_tmp = answer_tmp.split(', ')
-
-    answer = []
-    for a in answer_tmp:
-        answer.append(int(a))
-
-    return num_variables, degree, k, eq, answer
+    return num_variables, degree, k, eq

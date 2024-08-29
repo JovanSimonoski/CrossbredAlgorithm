@@ -2,7 +2,7 @@ from sage.all import Matrix, GF, vector
 from utils import *
 
 
-def crossbred(num_variables, degree, k, equations, answer):
+def crossbred(num_variables, degree, k, equations):
     monomials, monomials_degree_d, monomials_fukuoka_mq_challenge, sorted_monomials_deg_k = generate_monomials_types(
         degree, k, num_variables)
 
@@ -57,7 +57,7 @@ def crossbred(num_variables, degree, k, equations, answer):
 
     def fast_evaluate(system_polynomials, remaining, k_parameter, solution):
         if remaining == k_parameter:
-            return solve_linear_system(k_parameter, solution, system_polynomials, num_variables, answer)
+            return solve_linear_system(k_parameter, solution, system_polynomials, num_variables)
 
         x_l = variables[remaining - 1]
         x_l_binary = mon_bin_dict[x_l]
