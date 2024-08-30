@@ -1,6 +1,6 @@
 # Crossbred Algorithm Implementation
 
-This is a Python implementation of the crossbred algorithm presented in the paper _"A crossbred algorithm for solving Boolean polynomial systems"_ by Antoine Joux and Vanessa Vitse.
+This is a Python implementation of the crossbred algorithm presented in the paper [_"A crossbred algorithm for solving Boolean polynomial systems"_](https://ia.cr/2017/372) by Antoine Joux and Vanessa Vitse.
 
 ## Algorithm Overview
 
