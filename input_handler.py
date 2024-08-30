@@ -1,4 +1,18 @@
 def parse_input():
+    """
+    Parsing the input based on the Fukuoka MQ Challenge format and then getting few parameters from the user:
+        n(number of variables),
+        seed(the seed of the example we want to try - Fukuoka related),
+        k(the 'k' parameter that represents how many variables to keep / number of not fixed variables),
+        degree(the degree of the Macaulay matrix, represented in the paper as 'D').
+
+    Returns:
+        num_variables(int): number of variables
+        degree(int): degree
+        k(int): the 'k' parameter
+        eq(List[List[int]]): equations from the input
+        answer(List[int]): the answer of the example
+    """
     input_list = []
     n = input('How many variables? 10, 15, 20 : ')
     seed = input('Which seed do you want to try? 0, 1, 2, 3, 4 : ')

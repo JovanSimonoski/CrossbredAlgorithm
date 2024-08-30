@@ -3,6 +3,31 @@ from utils import *
 
 
 def crossbred(num_variables, degree, k, equations, answer):
+    """
+    The main logic of the Crossbred algorithm that's implemented.
+    Steps:
+    1. Setup
+        - Generate all the lists of monomials of the different monomial types
+        - Format the equations got from the input
+        - Generate variables
+        - Construct necessary dictionaries
+        - Add leading zeros to the equations so their length corresponds to the number of columns in the Macaulay matrix
+    2. Construction of the first and second sub matrix
+    3. Finding vectors in the left kernel of the second sub matrix
+    4. Calculating the polynomials corresponding to vector_i * (first sub matrix) and sorting them in grevlex
+    5. Calling Fast Evaluate function only with the new polynomials because of the d = 1 (hardcoded)
+    6. Trying to solve the system got from each complete evaluation of
+        the Fast Evaluate function (on the end of each recursion)
+
+    Parameters:
+        num_variables(int): The number of variables.
+        degree(int): The max. degree of the monomials.
+        k(int): The 'k' parameter
+        equations(List[List[int]]): The system of equations want to solve.
+            Each equation is represented as a list of integers.
+        answer(List[int]): The actual answer to the example,
+            derived from the Fukuoka MQ Challenge input (the answer file).
+    """
     monomials, monomials_degree_d, monomials_fukuoka_mq_challenge, sorted_monomials_deg_k = generate_monomials_types(
         degree, k, num_variables)
 
