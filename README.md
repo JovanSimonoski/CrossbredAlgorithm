@@ -20,10 +20,14 @@ To execute the algorithm, use the following command:
 sage main.py
 ```
 Next you will be promted to choose: 
-  - the number of variables, 
-  - the seed,
+  - the number of variables 'n', 
+  - the number of equations 'm',
   - the 'k' parameter and
-  - the degree of the Macaulay matrix - 'D'. 
+  - the degree of the Macaulay matrix 'D'. 
+
+A random system will be generated for the 'n' and 'm' parameters. 
+
+The program then tries to solve the system and compares the obtained solution with the correct solution of the generated system.
 
 This implementation works only for hard coded value of d = 1.
 
