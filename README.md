@@ -13,6 +13,7 @@ Clone the repo:
 ```bash
 git clone https://github.com/JovanSimonoski/CrossbredAlgorithm.git
 cd CrossbredAlgorithm
+cd code
 ```
 To execute the algorithm, use the following command:
 ```bash
