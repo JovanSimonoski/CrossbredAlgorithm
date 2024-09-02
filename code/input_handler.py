@@ -1,4 +1,4 @@
-def parse_input():
+def parse_input(n, m):
     """
     Parsing the input based on the Fukuoka MQ Challenge format and then getting few parameters from the user:
         n(number of variables),
@@ -6,17 +6,20 @@ def parse_input():
         k(the 'k' parameter that represents how many variables to keep / number of not fixed variables),
         degree(the degree of the Macaulay matrix, represented in the paper as 'D').
 
+    Parameters:
+        n(int): Number of variables.
+        m(int): Number of equations.
+
     Returns:
-        num_variables(int): number of variables
-        degree(int): degree
-        k(int): the 'k' parameter
-        eq(List[List[int]]): equations from the input
-        answer(List[int]): the answer of the example
+        degree(int): Degree.
+        k(int): The 'k' parameter.
+        eq(List[List[int]]): Equations from the input.
+        answer(List[int]): The answer of the example.
     """
+    file_path = f'../example_input/auto_generated/example_n{n}_m{m}'
+
     input_list = []
-    n = input('How many variables? 10, 15, 20 : ')
-    seed = input('Which seed do you want to try? 0, 1, 2, 3, 4 : ')
-    with open(f'../example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}', 'r') as file:
+    with open(file_path, 'r') as file:
         for line in file:
             input_list.append(line.strip())
 
@@ -39,12 +42,11 @@ def parse_input():
     var_val = dict(zip(variables, values))
     eq = [list(map(int, line.strip(' ;').split())) for line in input_equations]
 
-    num_variables = int(var_val['num_variables'])
     degree = int(var_val['degree'])
     k = int(var_val['k'])
 
     answer_tmp = []
-    with open(f'../example_input/toy_example_n{n}/ToyExample-type1-n{n}-seed{seed}-answer', 'r') as file:
+    with open(f'{file_path}-answer', 'r') as file:
         for line in file:
             answer_tmp = line.strip()[1:-1]
 
@@ -54,4 +56,4 @@ def parse_input():
     for a in answer_tmp:
         answer.append(int(a))
 
-    return num_variables, degree, k, eq, answer
+    return degree, k, eq, answer
