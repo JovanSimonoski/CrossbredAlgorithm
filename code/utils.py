@@ -1,4 +1,6 @@
 import copy
+import math
+
 from sage.all import Matrix, GF, vector
 from functools import cmp_to_key
 from itertools import combinations_with_replacement, combinations
@@ -525,6 +527,7 @@ def construct_first_sub_matrix(equations, monomials, num_variables, index_bin_di
                 line[index] %= 2
             mm_sub_matrix_1.append(copy.copy(line))
 
+    mm_sub_matrix_1.extend(equations)
     return mm_sub_matrix_1
 
 
@@ -554,3 +557,26 @@ def construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomial
         mm_sub_matrix_2.append(line)
 
     return mm_sub_matrix_2
+
+
+def get_size_of_mm(n, degree, m):
+    """
+    Calculates the size of a Macaulay matrix for given number of values n, degree D and number of equation m.
+
+    Parameters:
+        n(int): Number of variables.
+        degree(int): Degree of the Macaulay matrix.
+        m(int): Number of equations.
+    """
+    num_cols = 0
+    for i in range(degree, -1, -1):
+        num_cols += math.comb(n, i)
+
+    num_rows = (n + 1) * m
+    for i in range(2, degree - 1):
+        print(f'i={i}')
+        num_rows += math.comb(n, i) * m
+
+    print(f'-----------\n'
+          f'Number of Rows x Columns:{num_rows}x{num_cols}'
+          f'\n-----------')
