@@ -15,11 +15,11 @@ git clone https://github.com/JovanSimonoski/CrossbredAlgorithm.git
 cd CrossbredAlgorithm
 cd code
 ```
-To execute the algorithm, use the following command:
+To execute the algorithm, use the following example command:
 ```bash
-sage main.py
+sage main.py -n 10 -m 20 -k 5 -D 2
 ```
-Next you will be promted to choose: 
+The arguments for the program are: 
   - the number of variables 'n', 
   - the number of equations 'm',
   - the 'k' parameter and
