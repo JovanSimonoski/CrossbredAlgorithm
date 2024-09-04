@@ -2,17 +2,11 @@ import os
 from random import randint
 
 
-def generate_mq():
+def generate_mq(n, m):
     """
     Generates a MQ polynomial systems with given number of variables and number of equations.
     Writes the generated system and solution into files with predefined file paths.
-
-    Returns:
-        n(int): Number of variables.
-        m(int): Number of equations.
     """
-    n = int(input('n: '))
-    m = int(input('m: '))
 
     file_path = f'../example_input/auto_generated/example_n{n}_m{m}'
 
@@ -56,5 +50,3 @@ def generate_mq():
                     result ^= solution[j]
 
             f.write(str(result) + ";\n")
-
-    return n, m

@@ -11,8 +11,6 @@ def parse_input(n, m):
         m(int): Number of equations.
 
     Returns:
-        degree(int): Degree.
-        k(int): The 'k' parameter.
         eq(List[List[int]]): Equations from the input.
         answer(List[int]): The answer of the example.
     """
@@ -32,18 +30,9 @@ def parse_input(n, m):
     for line in input_values:
         values.append(line.split(':')[-1].strip())
 
-    k = input('k: ')
-    degree = input('D: ')
-
-    values.append(degree)
-    values.append(k)
-
-    variables = ['galois_field', 'num_variables', 'num_equations', 'seed', 'order', 'degree', 'k']
-    var_val = dict(zip(variables, values))
+    # variables = ['galois_field', 'num_variables', 'num_equations', 'seed', 'order']
+    # var_val = dict(zip(variables, values))
     eq = [list(map(int, line.strip(' ;').split())) for line in input_equations]
-
-    degree = int(var_val['degree'])
-    k = int(var_val['k'])
 
     answer_tmp = []
     with open(f'{file_path}-answer', 'r') as file:
@@ -56,4 +45,4 @@ def parse_input(n, m):
     for a in answer_tmp:
         answer.append(int(a))
 
-    return degree, k, eq, answer
+    return eq, answer

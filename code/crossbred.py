@@ -63,8 +63,8 @@ def crossbred(num_variables, degree, k, equations, answer):
     print('DONE')
 
     """ ---- Finding vectors in the left kernel of the second sub matrix M(F) ----"""
-    sage_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1_sorted_deg_k)
-    sage_sub_matrix_2 = Matrix(GF(2), mm_sub_matrix_2)
+    sage_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1_sorted_deg_k, sparse=True)
+    sage_sub_matrix_2 = Matrix(GF(2), mm_sub_matrix_2, sparse=True)
     print('\nFinding vectors in the left kernel of the second sub matrix M(F)')
     left_kernel = sage_sub_matrix_2.left_kernel()
     print('DONE')
