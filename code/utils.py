@@ -1,5 +1,7 @@
 import copy
 import math
+import os
+import time
 
 from sage.all import Matrix, GF, vector
 from functools import cmp_to_key
@@ -386,9 +388,16 @@ def solve_linear_system(k, solution, system_polynomials, num_variables, answer):
         if all(val == 0 for val in s):
             return
         if s == answer:
+            end_time = time.time()
             print('\nGOT THE CORRECT SOLUTION:')
             print(s)
             print(answer)
+
+            with open('current_time.txt', 'r') as f:
+                start_time = float(f.read())
+            if os.path.exists('current_time.txt'):
+                os.remove('current_time.txt')
+            print(f'\nFinished in {round((end_time - start_time) / 60, 4)} minutes')
 
             exit(0)
     except ValueError:

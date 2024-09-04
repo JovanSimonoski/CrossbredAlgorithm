@@ -2,6 +2,7 @@ from crossbred import crossbred
 from input_handler import parse_input
 from mq import *
 import argparse
+import time
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Getting the parameters.")
@@ -15,6 +16,11 @@ if __name__ == '__main__':
     m = int(args.m)
     k = int(args.k)
     degree = int(args.D)
+
+    start_time = time.time()
+
+    with open('current_time.txt', 'w') as f:
+        f.write(str(start_time))
 
     generate_mq(n, m)
     equations, answer = parse_input(n, m)
