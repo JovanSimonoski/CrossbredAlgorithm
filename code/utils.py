@@ -389,16 +389,16 @@ def solve_linear_system(k, solution, system_polynomials, num_variables, answer):
             return
         if s == answer:
             end_time = time.time()
-            print('\nGOT THE CORRECT SOLUTION:')
-            print(s)
-            print(answer)
 
             with open('current_time.txt', 'r') as f:
                 start_time = float(f.read())
             if os.path.exists('current_time.txt'):
                 os.remove('current_time.txt')
-            print(f'\nFinished in {round((end_time - start_time) / 60, 4)} minutes')
 
+            with open(f'finished_n{num_variables}_k{k}.txt', 'w') as f:
+                f.write(str(s) + '\n')
+                f.write(str(answer) + '\n')
+                f.write(f'\nFinished in {round((end_time - start_time) / 60, 4)} minutes\n')
             exit(0)
     except ValueError:
         pass

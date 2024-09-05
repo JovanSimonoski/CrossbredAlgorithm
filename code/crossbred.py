@@ -48,34 +48,34 @@ def crossbred(num_variables, degree, k, equations, answer):
     add_leading_zeros(equations, len_monomials_degree_d - len_monomials)
 
     """ ---- Constructing the first sub matrix Mac(F) sorted by deg_k and of degree D ---- """
-    print('\nFirst sub matrix generating')
+    # print('\nFirst sub matrix generating')
     mm_sub_matrix_1 = construct_first_sub_matrix(equations, monomials_degree_d, num_variables, index_bin_dict,
                                                  mon_bin_dict, bin_index_dict)
-    print('DONE')
+    # print('DONE')
 
-    print('\nSorting the sub matrix to deg_k')
+    # print('\nSorting the sub matrix to deg_k')
     mm_sub_matrix_1_sorted_deg_k = sort_matrix_columns_by_dictionary(default_to_deg_k_index_dict, mm_sub_matrix_1)
-    print('DONE')
+    # print('DONE')
 
     """ ---- Constructing the second sub matrix M(F) sorted by deg_k and of degree D ---- """
-    print('\nSecond sub matrix generating')
+    # print('\nSecond sub matrix generating')
     mm_sub_matrix_2 = construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k)
-    print('DONE')
+    # print('DONE')
 
     sage_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1_sorted_deg_k, sparse=True)
     sage_sub_matrix_2 = Matrix(GF(2), mm_sub_matrix_2, sparse=True)
 
     """ ---- Finding vectors in the left kernel of the second sub matrix M(F) ----"""
-    print('\nFinding vectors in the left kernel of the second sub matrix M(F)')
+    # print('\nFinding vectors in the left kernel of the second sub matrix M(F)')
     left_kernel = sage_sub_matrix_2.left_kernel()
-    print('DONE')
+    # print('DONE')
 
     num_vectors = len(left_kernel.basis())
 
     """ ---- Calculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) ----"""
-    print(
-        '\nCalculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) and sorting them to '
-        'default')
+    # print(
+    #     '\nCalculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) and sorting them to '
+    #     'default')
     p_polynomials = []
 
     if num_vectors >= k + 1:
@@ -86,7 +86,7 @@ def crossbred(num_variables, degree, k, equations, answer):
         p_polynomials.append(list(left_kernel.basis()[i] * sage_sub_matrix_1))
 
     p_polynomials_default_sorted = sort_matrix_columns_by_dictionary(deg_k_to_default_index_dict, p_polynomials)
-    print('DONE')
+    # print('DONE')
 
     def fast_evaluate(system_polynomials, remaining, k_parameter, solution):
         if remaining == k_parameter:
@@ -139,5 +139,5 @@ def crossbred(num_variables, degree, k, equations, answer):
         fast_evaluate(p_0_system, remaining - 1, k_parameter, s_0)
         fast_evaluate(p_1_system, remaining - 1, k_parameter, s_1)
 
-    print('\nCalling Fast Evaluate and waiting for solution')
+    # print('\nCalling Fast Evaluate and waiting for solution')
     fast_evaluate(p_polynomials_default_sorted, num_variables, k, [])

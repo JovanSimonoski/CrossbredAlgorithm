@@ -17,10 +17,8 @@ if __name__ == '__main__':
     k = int(args.k)
     degree = int(args.D)
 
-    start_time = time.time()
-
     with open('current_time.txt', 'w') as f:
-        f.write(str(start_time))
+        f.write(str(time.time()))
 
     generate_mq(n, m)
     equations, answer = parse_input(n, m)
