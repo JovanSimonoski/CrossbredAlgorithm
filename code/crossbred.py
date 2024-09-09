@@ -52,16 +52,52 @@ def crossbred(num_variables, degree, k, equations, answer):
                                                  mon_bin_dict, bin_index_dict)
     mm_sub_matrix_1_sorted_deg_k = sort_matrix_columns_by_dictionary(default_to_deg_k_index_dict, mm_sub_matrix_1)
 
-    """ ---- Constructing the second sub matrix M(F) sorted by deg_k and of degree D ---- """
-    mm_sub_matrix_2 = construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k)
-
-    sage_sub_matrix_1 = Matrix(GF(2),
-                               extract_sub_matrix_degree_d(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k, 1,
-                                                           0), sparse=True)
-    sage_sub_matrix_2 = Matrix(GF(2), mm_sub_matrix_2, sparse=True)
-
     """ ---- Finding vectors in the left kernel of the second sub matrix M(F) ----"""
-    left_kernel = sage_sub_matrix_2.left_kernel()
+
+    tmp_counter = 0
+    for i in range(len(sorted_monomials_deg_k) - 1, -1, -1):
+        if deg_k(sorted_monomials_deg_k[i], k) > 1:
+            break
+        tmp_counter += 1
+
+    linear_separator = len(sorted_monomials_deg_k) - tmp_counter
+
+    mm_sub_matrix_1 = []
+    for m in mm_sub_matrix_1_sorted_deg_k:
+        mm_sub_matrix_1.append(m[linear_separator:])
+
+    sub_matrix_separator = linear_separator // 2
+
+    mm_sub_matrix_2_1 = []
+    mm_sub_matrix_2_2 = []
+    for m in mm_sub_matrix_1_sorted_deg_k:
+        mm_sub_matrix_2_1.append(m[:sub_matrix_separator])
+        mm_sub_matrix_2_2.append(m[sub_matrix_separator:linear_separator])
+
+    sage_mm_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1, sparse=True)
+    sage_mm_sub_matrix_2_1 = Matrix(GF(2), mm_sub_matrix_2_1, sparse=True)
+    sage_mm_sub_matrix_2_2 = Matrix(GF(2), mm_sub_matrix_2_2, sparse=True)
+
+    left_kernel_sage_mm_sub_matrix_2_1 = sage_mm_sub_matrix_2_1.left_kernel()
+    left_kernel_sage_mm_sub_matrix_2_2 = sage_mm_sub_matrix_2_2.left_kernel()
+
+    """
+    print(
+        f'\nleft kernel sage_mm_sub_matrix_2_1 size = '
+        f'{len(left_kernel_sage_mm_sub_matrix_2_1.basis())} x {len(left_kernel_sage_mm_sub_matrix_2_1.basis()[0])}'
+        f' = {len(left_kernel_sage_mm_sub_matrix_2_1.basis()) * len(left_kernel_sage_mm_sub_matrix_2_1.basis()[0])}')
+
+    print(
+        f' left kernel sage_mm_sub_matrix_2_2 size = '
+        f'{len(left_kernel_sage_mm_sub_matrix_2_2.basis())} x {len(left_kernel_sage_mm_sub_matrix_2_2.basis()[0])}'
+        f' = {len(left_kernel_sage_mm_sub_matrix_2_2.basis()) * len(left_kernel_sage_mm_sub_matrix_2_2.basis()[0])}')
+    
+    print(f'Sub matrix size = {len(mm_sub_matrix_1_sorted_deg_k)} x {linear_separator} = '
+          f'{len(mm_sub_matrix_1_sorted_deg_k) * linear_separator}')
+    """
+
+    left_kernel = left_kernel_sage_mm_sub_matrix_2_1.intersection(left_kernel_sage_mm_sub_matrix_2_2)
+
     num_vectors = len(left_kernel.basis())
 
     if num_vectors >= k + 1:
@@ -70,7 +106,7 @@ def crossbred(num_variables, degree, k, equations, answer):
     """ ---- Calculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) ----"""
     p_polynomials = []
     for i in range(num_vectors):
-        p_polynomials.append(list(left_kernel.basis()[i] * sage_sub_matrix_1))
+        p_polynomials.append(list(left_kernel.basis()[i] * sage_mm_sub_matrix_1))
 
     add_leading_zeros(p_polynomials, len(sorted_monomials_deg_k) - len(p_polynomials[0]))
 
