@@ -534,7 +534,7 @@ def construct_first_sub_matrix(equations, monomials, num_variables, index_bin_di
                 index = bin_index_dict[mon_bin]
                 line[index] += 1
                 line[index] %= 2
-            mm_sub_matrix_1.append(copy.copy(line))
+            mm_sub_matrix_1.append(line)
 
     mm_sub_matrix_1.extend(equations)
     return mm_sub_matrix_1
@@ -562,10 +562,47 @@ def construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomial
 
     mm_sub_matrix_2 = []
     for m in mm_sub_matrix_1_sorted_deg_k:
-        line = copy.copy(m[:mm_sub_matrix_2_counter])
-        mm_sub_matrix_2.append(line)
+        mm_sub_matrix_2.append(m[:mm_sub_matrix_2_counter])
 
     return mm_sub_matrix_2
+
+
+def extract_sub_matrix_degree_d(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k, d_start, d_end):
+    """
+    The extracted sub matrix contains the columns of the first sub matrix corresponding
+    to monomials m with deg_k(m) <= d_start and deg_k(m) >= d_end.
+
+    Parameters:
+        k (int): The 'k' parameter
+        mm_sub_matrix_1_sorted_deg_k (List[List[int]]): The first sub matrix represented as
+            list of lists of integers (matrix) and sorted by deg_k.
+        sorted_monomials_deg_k(List[Monomial]): List of all the monomials of max. degree D sorted by deg_k.
+        d_start (int): The starting degree (deg_k).
+        d_end (int): The ending degree (deg_k).
+    Returns:
+        List[List[int]]: The extracted sub matrix.
+    """
+
+    if d_start < d_end:
+        return
+
+    start = 0
+    finish = 0
+    for m in range(len(sorted_monomials_deg_k)):
+        if deg_k(sorted_monomials_deg_k[m], k) == d_start:
+            start = m
+            break
+
+    for m in range(len(sorted_monomials_deg_k) - 1, -1, -1):
+        if deg_k(sorted_monomials_deg_k[m], k) == d_end:
+            finish = m
+            break
+
+    extracted_sub_matrix = []
+    for m in mm_sub_matrix_1_sorted_deg_k:
+        extracted_sub_matrix.append(m[start:finish + 1])
+
+    return extracted_sub_matrix
 
 
 def get_size_of_mm(n, degree, m):
