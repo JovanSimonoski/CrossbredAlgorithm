@@ -55,25 +55,17 @@ def crossbred(num_variables, degree, k, equations, answer):
     """ ---- Constructing the second sub matrix M(F) sorted by deg_k and of degree D ---- """
     mm_sub_matrix_2 = construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k)
 
-    sage_sub_matrix_1 = Matrix(GF(2), extract_sub_matrix_degree_d(
-        k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k, 1, 0), sparse=True)
+    sage_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1_sorted_deg_k, sparse=True)
     sage_sub_matrix_2 = Matrix(GF(2), mm_sub_matrix_2, sparse=True)
 
     """ ---- Finding vectors in the left kernel of the second sub matrix M(F) ----"""
     left_kernel = sage_sub_matrix_2.left_kernel()
 
-    num_vectors = len(left_kernel.basis())
-
     """ ---- Calculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) ----"""
     p_polynomials = []
 
-    if num_vectors >= k + 1:
-        num_vectors = k + 1
-
-    for i in range(num_vectors):
+    for i in range(len(left_kernel.basis())):
         p_polynomials.append(list(left_kernel.basis()[i] * sage_sub_matrix_1))
-
-    add_leading_zeros(p_polynomials, len(sorted_monomials_deg_k) - len(p_polynomials[0]))
 
     p_polynomials_default_sorted = sort_matrix_columns_by_dictionary(deg_k_to_default_index_dict, p_polynomials)
 
