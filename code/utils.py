@@ -626,3 +626,143 @@ def get_size_of_mm(n, degree, m):
     print(f'-----------\n'
           f'Number of Rows x Columns:{num_rows}x{num_cols}'
           f'\n-----------')
+
+
+def rref(matrix):
+    """
+        Function that transforms a binary matrix into Reduced Row Echelon Form
+        Parameters:
+            matrix(List[List[int]]): The matrix that we want to transform
+    """
+    rows, cols = len(matrix), len(matrix[0])
+    lead = 0
+    for r in range(rows):
+        if lead >= cols:
+            return matrix
+        i = r
+        while matrix[i][lead] == 0:
+            i += 1
+            if i == rows:
+                i = r
+                lead += 1
+                if cols == lead:
+                    return matrix
+        matrix[i], matrix[r] = matrix[r], matrix[i]
+
+        for i in range(rows):
+            if i != r and matrix[i][lead] == 1:
+                matrix[i] = [(iv ^ rv) for iv, rv in zip(matrix[i], matrix[r])]
+        lead += 1
+
+
+def transpose_matrix(matrix):
+    """
+        Function that transposes a matrix
+        Parameters:
+            matrix(List[List[int]]): The matrix that we want to transpose
+    """
+    return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
+
+
+def apply_matrix(matrix_to_apply, matrix_to_be_applied_on):
+    """
+        Function that applies one matrix to another one using Gaussian Elimination
+        Parameters:
+            matrix_to_apply(List[List[int]]): The matrix we are applying
+            matrix_to_be_applied_on(List[List[int]]): The matrix that we want to apply the changes to
+    """
+    for row in matrix_to_apply:
+        pivot = -1
+        for p in range(len(row)):
+            if row[p] == 1:
+                pivot = p
+                break
+        if pivot != -1:
+            for i in range(len(matrix_to_be_applied_on)):
+                if matrix_to_be_applied_on[i][pivot] == 1:
+                    matrix_to_be_applied_on[i] = [row[q] ^ matrix_to_be_applied_on[i][q] for q in range(len(row))]
+
+
+def find_and_swap_missing_pivot(reduced_sub_matrix, other_sub_matrix, starting_column=0):
+    """
+        Finds and swaps missing pivot rows from one sub matrix to another
+        Parameters:
+            reduced_sub_matrix(List[List[int]]): The main sub matrix who has missing pivot rows
+            other_sub_matrix(List[List[int]]): The other sub matrix from whom
+                we get the rows we need in the main sub matrix
+            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+    """
+    rows_reduced = len(reduced_sub_matrix)
+    columns_reduced = len(reduced_sub_matrix[0])
+    rows_other = len(other_sub_matrix)
+
+    r = 0
+    for col in range(starting_column, columns_reduced, 1):
+        if r == rows_reduced:
+            break
+        if reduced_sub_matrix[r][col] == 0:
+            for row in range(rows_other):
+                if other_sub_matrix[row][col] == 1:
+                    tmp = other_sub_matrix[row]
+                    other_sub_matrix[row] = reduced_sub_matrix[r]
+                    reduced_sub_matrix[r] = tmp
+                    break
+        r += 1
+
+
+def check_rref(matrix, starting_column=0):
+    """
+        Check if a matrix is in a Reduced Row Echelon Form
+        * It is used only for the first 2 sub matrices (may not be always correct)
+        Parameters:
+            matrix(List[List[int]]): The sub matrix
+            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+        Returns:
+            bool: True if the matrix is in Reduced Row Echelon Form, false otherwise
+    """
+    rows = len(matrix)
+    columns = len(matrix[0])
+
+    r = 0
+    for i in range(starting_column, columns):
+        if matrix[r][i] == 0:
+            return False
+        r += 1
+        if r >= rows:
+            break
+
+    return True
+
+
+def get_pivots(sub_matrix, pivots, starting_column):
+    """
+        Extracts the indexes of the pivots from a sub matrix and adds them to the pivots list
+        Parameters:
+            sub_matrix(List[List[int]]): The sub matrix
+            pivots(List[int]): Indexes of the pivots
+            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+    """
+    rows, cols = len(sub_matrix), len(sub_matrix[0])
+
+    for r in range(rows):
+        for c in range(starting_column, cols):
+            if sub_matrix[r][c] == 1:
+                pivots.append(c)
+                break
+
+
+def construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix, starting_row=0):
+    """
+        Constructs the null space basis of a matrix in many iterations using sub matrices
+        Parameters:
+            null_space_basis(List[List[int]]): The null space basis
+            free_vars(List[int]): Indexes of free variables
+            pivots(List[int]): Indexes of the pivots
+            sub_matrix(List[List[int]]): The sub matrix
+            starting_row(int): Starting row of the sub matrix considering it's not the whole matrix
+    """
+    for index, free_var in enumerate(free_vars):
+        null_vector = null_space_basis[index]
+        for r in range(len(sub_matrix)):
+            if sub_matrix[r][free_var] == 1:
+                null_vector[pivots[r + starting_row]] = 1

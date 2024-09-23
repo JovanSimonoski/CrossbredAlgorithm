@@ -2,98 +2,6 @@ from sage.all import Matrix, GF, vector, VectorSpace, PolynomialRing, block_matr
 from utils import *
 
 
-def rref_binary(matrix):
-    rows, cols = len(matrix), len(matrix[0])
-    lead = 0
-    for r in range(rows):
-        if lead >= cols:
-            return matrix
-        i = r
-        while matrix[i][lead] == 0:
-            i += 1
-            if i == rows:
-                i = r
-                lead += 1
-                if cols == lead:
-                    return matrix
-        matrix[i], matrix[r] = matrix[r], matrix[i]
-
-        for i in range(rows):
-            if i != r and matrix[i][lead] == 1:
-                matrix[i] = [(iv ^ rv) for iv, rv in zip(matrix[i], matrix[r])]
-        lead += 1
-    return matrix
-
-
-def null_space_binary(matrix, max_num_vectors=99999):
-    rref_matrix = matrix
-
-    rows, cols = len(rref_matrix), len(rref_matrix[0])
-
-    pivots = []
-    for r in range(rows):
-        for c in range(cols):
-            if rref_matrix[r][c] == 1:
-                pivots.append(c)
-                break
-
-    free_vars = [i for i in range(cols) if i not in pivots]
-
-    if not free_vars:
-        return [[0] * cols]
-
-    null_space_basis = []
-    counter = 0
-    for free_var in free_vars:
-        null_vector = [0] * cols
-        null_vector[free_var] = 1
-        for r in range(rows):
-            if rref_matrix[r][free_var] == 1:
-                null_vector[pivots[r]] = 1
-        null_space_basis.append(vector(null_vector))
-        counter += 1
-        if counter == max_num_vectors:
-            return null_space_basis
-
-    return null_space_basis
-
-
-def transpose_binary(matrix):
-    return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
-
-
-def apply_matrix(matrix_to_apply, matrix_to_be_applied_on):
-    for row in matrix_to_apply:
-        pivot = -1
-        for p in range(len(row)):
-            if row[p] == 1:
-                pivot = p
-                break
-        if pivot != -1:
-            for i in range(len(matrix_to_be_applied_on)):
-                if matrix_to_be_applied_on[i][pivot] == 1:
-                    matrix_to_be_applied_on[i] = [row[q] ^ matrix_to_be_applied_on[i][q] for q in range(len(row))]
-
-
-def find_and_swap_missing_pivot(reduced_sub_matrix, other_sub_matrix, col_start=0):
-    rows_reduced = len(reduced_sub_matrix)
-    columns_reduced = len(reduced_sub_matrix[0])
-    rows_other = len(other_sub_matrix)
-
-    r = 0
-    for col in range(col_start, columns_reduced, 1):
-        if r == rows_reduced:
-            break
-        if reduced_sub_matrix[r][col] == 0:
-            for row in range(rows_other):
-                if other_sub_matrix[row][col] == 1:
-                    tmp = other_sub_matrix[row]
-                    other_sub_matrix[row] = reduced_sub_matrix[r]
-                    reduced_sub_matrix[r] = tmp
-                    break
-        r += 1
-
-
 def crossbred(num_variables, degree, k, equations, answer):
     """
     The main logic of the Crossbred algorithm that's implemented.
@@ -161,61 +69,89 @@ def crossbred(num_variables, degree, k, equations, answer):
         mm_sub_matrix_1.append(m[linear_separator:])
 
     sage_mm_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1, sparse=True)
-    mm_sub_matrix_2 = transpose_binary(mm_sub_matrix_2)
+
+    mm_sub_matrix_2 = transpose_matrix(mm_sub_matrix_2)
 
     separator = len(mm_sub_matrix_2) // 3
     sub_matrix_1 = mm_sub_matrix_2[:separator]
     sub_matrix_2 = mm_sub_matrix_2[separator:separator * 2]
     sub_matrix_3 = mm_sub_matrix_2[separator * 2:]
 
-    sub_matrix_1_echelon = rref_binary(sub_matrix_1)
+    """ -   -   - """
 
-    find_and_swap_missing_pivot(sub_matrix_1_echelon, sub_matrix_2, 0)
+    rref(sub_matrix_1)
 
-    sub_matrix_1_echelon = rref_binary(sub_matrix_1_echelon)
+    if not check_rref(sub_matrix_1):
+        find_and_swap_missing_pivot(sub_matrix_1, sub_matrix_2, 0)
+        rref(sub_matrix_1)
 
-    apply_matrix(sub_matrix_1_echelon, sub_matrix_2)
-    apply_matrix(sub_matrix_1_echelon, sub_matrix_3)
+    apply_matrix(sub_matrix_1, sub_matrix_2)
+    apply_matrix(sub_matrix_1, sub_matrix_3)
 
-    find_and_swap_missing_pivot(sub_matrix_1_echelon, sub_matrix_2, 0)
+    if not check_rref(sub_matrix_1):
+        find_and_swap_missing_pivot(sub_matrix_1, sub_matrix_2, 0)
+        rref(sub_matrix_1)
+        apply_matrix(sub_matrix_1, sub_matrix_2)
+        apply_matrix(sub_matrix_1, sub_matrix_3)
 
-    sub_matrix_1_echelon = rref_binary(sub_matrix_1_echelon)
+    """ -   -   - """
 
-    apply_matrix(sub_matrix_1_echelon, sub_matrix_2)
-    apply_matrix(sub_matrix_1_echelon, sub_matrix_3)
+    rref(sub_matrix_2)
+    if not check_rref(sub_matrix_2, len(sub_matrix_1)):
+        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len(sub_matrix_1))
+        rref(sub_matrix_2)
 
-    sub_matrix_2_echelon = rref_binary(sub_matrix_2)
+    apply_matrix(sub_matrix_2, sub_matrix_1)
+    apply_matrix(sub_matrix_2, sub_matrix_3)
 
-    find_and_swap_missing_pivot(sub_matrix_2_echelon, sub_matrix_3, len(sub_matrix_1))
+    if not check_rref(sub_matrix_2, len(sub_matrix_1)):
+        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len(sub_matrix_1))
+        rref(sub_matrix_2)
 
-    sub_matrix_2_echelon = rref_binary(sub_matrix_2_echelon)
+        apply_matrix(sub_matrix_2, sub_matrix_1)
+        apply_matrix(sub_matrix_2, sub_matrix_3)
 
-    apply_matrix(sub_matrix_2_echelon, sub_matrix_1_echelon)
-    apply_matrix(sub_matrix_2_echelon, sub_matrix_3)
+    """ -   -   - """
 
-    find_and_swap_missing_pivot(sub_matrix_2_echelon, sub_matrix_3, len(sub_matrix_1))
+    rref(sub_matrix_3)
 
-    sub_matrix_2_echelon = rref_binary(sub_matrix_2_echelon)
+    apply_matrix(sub_matrix_3, sub_matrix_1)
+    apply_matrix(sub_matrix_3, sub_matrix_2)
 
-    apply_matrix(sub_matrix_2_echelon, sub_matrix_1_echelon)
-    apply_matrix(sub_matrix_2_echelon, sub_matrix_3)
+    """ -   -   - """
 
-    sub_matrix_3_echelon = rref_binary(sub_matrix_3)
+    pivots = []
 
-    apply_matrix(sub_matrix_3_echelon, sub_matrix_1_echelon)
-    apply_matrix(sub_matrix_3_echelon, sub_matrix_2_echelon)
+    get_pivots(sub_matrix_1, pivots, 0)
+    get_pivots(sub_matrix_2, pivots, len(sub_matrix_1))
+    get_pivots(sub_matrix_3, pivots, len(sub_matrix_1) + len(sub_matrix_2))
 
-    complete_matrix = sub_matrix_1_echelon
-    complete_matrix.extend(sub_matrix_2_echelon)
-    complete_matrix.extend(sub_matrix_3_echelon)
+    cols = len(sub_matrix_1[0])
+    free_vars = [i for i in range(cols) if i not in pivots]
 
-    left_kernel = null_space_binary(complete_matrix, k + 2)
+    if not free_vars:
+        exit()
+
+    if len(free_vars) >= k + 2:
+        free_vars = free_vars[:k + 2]
+
+    null_space_basis = []
+
+    for free_var in free_vars:
+        null_vector = [0] * cols
+        null_vector[free_var] = 1
+        null_space_basis.append(null_vector)
+
+    construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_1)
+    construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_2, len(sub_matrix_1))
+    construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_3,
+                               len(sub_matrix_1) + len(sub_matrix_2))
 
     """ ---- Calculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) ----"""
 
     p_polynomials = []
-    for i in range(len(left_kernel)):
-        p_polynomials.append(list(left_kernel[i] * sage_mm_sub_matrix_1))
+    for i in range(len(null_space_basis)):
+        p_polynomials.append(list(vector(null_space_basis[i]) * sage_mm_sub_matrix_1))
 
     add_leading_zeros(p_polynomials, len(sorted_monomials_deg_k) - len(p_polynomials[0]))
 
