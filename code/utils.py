@@ -605,24 +605,26 @@ def extract_sub_matrix_degree_d(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomial
     return extracted_sub_matrix
 
 
-def get_size_of_mm(n, degree, m):
+def get_size_of_mm(n, m, degree):
     """
     Calculates the size of a Macaulay matrix for given number of values n, degree D and number of equation m.
 
     Parameters:
         n(int): Number of variables.
-        degree(int): Degree of the Macaulay matrix.
         m(int): Number of equations.
+        degree(int): Degree of the Macaulay matrix.
     """
     num_cols = 0
     for i in range(degree, -1, -1):
         num_cols += math.comb(n, i)
 
-    num_rows = (n + 1) * m
-    for i in range(2, degree - 1):
-        print(f'i={i}')
-        num_rows += math.comb(n, i) * m
+    if degree == 2:
+        num_rows = m
+    else:
+        num_rows = (n + 1) * m
+        for i in range(2, degree - 1):
+            num_rows += math.comb(n, i) * m
 
     print(f'-----------\n'
-          f'Number of Rows x Columns:{num_rows}x{num_cols}'
+          f'Number of Rows x Columns: {num_rows} x {num_cols} = {num_rows * num_cols}'
           f'\n-----------')
