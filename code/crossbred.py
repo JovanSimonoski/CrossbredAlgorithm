@@ -28,6 +28,9 @@ def crossbred(num_variables, degree, k, equations, answer):
         answer(List[int]): The actual answer to the example,
             derived from the Fukuoka MQ Challenge input (the answer file).
     """
+
+    path = f'../runs_data/run_n{num_variables}_k{k}'
+
     monomials, monomials_degree_d, monomials_fukuoka_mq_challenge, sorted_monomials_deg_k = generate_monomials_types(
         degree, k, num_variables)
 
@@ -48,36 +51,52 @@ def crossbred(num_variables, degree, k, equations, answer):
     add_leading_zeros(equations, len_monomials_degree_d - len_monomials)
 
     """ ---- Constructing the first sub matrix Mac(F) sorted by deg_k and of degree D ---- """
-    mm_sub_matrix_1 = construct_first_sub_matrix(equations, monomials_degree_d, num_variables, index_bin_dict,
-                                                 mon_bin_dict, bin_index_dict)
-    mm_sub_matrix_1_sorted_deg_k = sort_matrix_columns_by_dictionary(default_to_deg_k_index_dict, mm_sub_matrix_1)
+    construct_first_sub_matrix_and_save_to_file(equations, monomials_degree_d, num_variables,
+                                                index_bin_dict,
+                                                mon_bin_dict,
+                                                bin_index_dict,
+                                                default_to_deg_k_index_dict,
+                                                sorted_monomials_deg_k,
+                                                k)
 
     """ ---- Finding vectors in the left kernel of the second sub matrix M(F) ----"""
 
-    tmp_counter = 0
-    for i in range(len(sorted_monomials_deg_k) - 1, -1, -1):
-        if deg_k(sorted_monomials_deg_k[i], k) > 1:
-            break
-        tmp_counter += 1
+    transpose_matrix_in_iterations('macaulay_matrix_2.txt', path)
+    os.remove(f'{path}/macaulay_matrix_2.txt')
 
-    linear_separator = len(sorted_monomials_deg_k) - tmp_counter
+    len_mm_sub_matrix_2 = 0
+    with open(f'{path}/transposed_mm.txt', 'r') as file:
+        for line in file:
+            len_mm_sub_matrix_2 += 1
 
-    mm_sub_matrix_1 = []
-    mm_sub_matrix_2 = []
-    for m in mm_sub_matrix_1_sorted_deg_k:
-        mm_sub_matrix_2.append(m[:linear_separator])
-        mm_sub_matrix_1.append(m[linear_separator:])
+    separator = len_mm_sub_matrix_2 // 3
+    sub_matrix_1 = []
+    sub_matrix_2 = []
+    sub_matrix_3 = []
 
-    sage_mm_sub_matrix_1 = Matrix(GF(2), mm_sub_matrix_1, sparse=True)
+    with open(f'{path}/transposed_mm.txt', 'r') as file, open(f'{path}/sub_mm_1.txt', 'a') as file_output:
+        lines = file.readlines()[:separator]
+        for line in lines:
+            file_output.write(line)
 
-    mm_sub_matrix_2 = transpose_matrix(mm_sub_matrix_2)
+    with open(f'{path}/transposed_mm.txt', 'r') as file, open(f'{path}/sub_mm_2.txt', 'a') as file_output:
+        lines = file.readlines()[separator:separator * 2]
+        for line in lines:
+            file_output.write(line)
 
-    separator = len(mm_sub_matrix_2) // 3
-    sub_matrix_1 = mm_sub_matrix_2[:separator]
-    sub_matrix_2 = mm_sub_matrix_2[separator:separator * 2]
-    sub_matrix_3 = mm_sub_matrix_2[separator * 2:]
+    with open(f'{path}/transposed_mm.txt', 'r') as file, open(f'{path}/sub_mm_3.txt', 'a') as file_output:
+        lines = file.readlines()[separator * 2:]
+        for line in lines:
+            file_output.write(line)
+
+    os.remove(f'{path}/transposed_mm.txt')
 
     """ -   -   - """
+
+    read_sub_matrix(sub_matrix_1, 1, path)
+    read_sub_matrix(sub_matrix_2, 2, path)
+
+    len_sub_matrix_1 = len(sub_matrix_1)
 
     rref(sub_matrix_1)
 
@@ -86,45 +105,82 @@ def crossbred(num_variables, degree, k, equations, answer):
         rref(sub_matrix_1)
 
     apply_matrix(sub_matrix_1, sub_matrix_2)
-    apply_matrix(sub_matrix_1, sub_matrix_3)
 
     if not check_rref(sub_matrix_1):
         find_and_swap_missing_pivot(sub_matrix_1, sub_matrix_2, 0)
         rref(sub_matrix_1)
         apply_matrix(sub_matrix_1, sub_matrix_2)
-        apply_matrix(sub_matrix_1, sub_matrix_3)
+
+    write_sub_matrix(sub_matrix_2, 2, path)
+    sub_matrix_2 = []
+
+    read_sub_matrix(sub_matrix_3, 3, path)
+
+    apply_matrix(sub_matrix_1, sub_matrix_3)
 
     """ -   -   - """
+
+    write_sub_matrix(sub_matrix_1, 1, path)
+    sub_matrix_1 = []
+
+    read_sub_matrix(sub_matrix_2, 2, path)
 
     rref(sub_matrix_2)
-    if not check_rref(sub_matrix_2, len(sub_matrix_1)):
-        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len(sub_matrix_1))
+    if not check_rref(sub_matrix_2, len_sub_matrix_1):
+        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len_sub_matrix_1)
         rref(sub_matrix_2)
 
-    apply_matrix(sub_matrix_2, sub_matrix_1)
     apply_matrix(sub_matrix_2, sub_matrix_3)
 
-    if not check_rref(sub_matrix_2, len(sub_matrix_1)):
-        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len(sub_matrix_1))
+    if not check_rref(sub_matrix_2, len_sub_matrix_1):
+        find_and_swap_missing_pivot(sub_matrix_2, sub_matrix_3, len_sub_matrix_1)
         rref(sub_matrix_2)
 
-        apply_matrix(sub_matrix_2, sub_matrix_1)
         apply_matrix(sub_matrix_2, sub_matrix_3)
 
+    write_sub_matrix(sub_matrix_3, 3, path)
+    sub_matrix_3 = []
+
+    read_sub_matrix(sub_matrix_1, 1, path)
+
+    apply_matrix(sub_matrix_2, sub_matrix_1)
+
+    write_sub_matrix(sub_matrix_1, 1, path)
+    sub_matrix_1 = []
+
     """ -   -   - """
+    read_sub_matrix(sub_matrix_3, 3, path)
 
     rref(sub_matrix_3)
 
-    apply_matrix(sub_matrix_3, sub_matrix_1)
     apply_matrix(sub_matrix_3, sub_matrix_2)
 
     """ -   -   - """
+    write_sub_matrix(sub_matrix_2, 2, path)
+    sub_matrix_2 = []
+
+    read_sub_matrix(sub_matrix_1, 1, path)
+
+    apply_matrix(sub_matrix_3, sub_matrix_1)
+    write_sub_matrix(sub_matrix_1, 1, path)
+    rref(sub_matrix_3)
+
+    write_sub_matrix(sub_matrix_3, 3, path)
 
     pivots = []
 
+    sub_matrix_3 = []
+    read_sub_matrix(sub_matrix_2, 2, path)
+
+    len_sub_matrix_2 = len(sub_matrix_2)
+
     get_pivots(sub_matrix_1, pivots, 0)
-    get_pivots(sub_matrix_2, pivots, len(sub_matrix_1))
-    get_pivots(sub_matrix_3, pivots, len(sub_matrix_1) + len(sub_matrix_2))
+    get_pivots(sub_matrix_2, pivots, len_sub_matrix_1)
+
+    sub_matrix_2 = []
+    read_sub_matrix(sub_matrix_3, 3, path)
+
+    get_pivots(sub_matrix_3, pivots, len_sub_matrix_1 + len_sub_matrix_2)
 
     cols = len(sub_matrix_1[0])
     free_vars = [i for i in range(cols) if i not in pivots]
@@ -143,11 +199,35 @@ def crossbred(num_variables, degree, k, equations, answer):
         null_space_basis.append(null_vector)
 
     construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_1)
-    construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_2, len(sub_matrix_1))
+
+    sub_matrix_1 = []
+
+    read_sub_matrix(sub_matrix_2, 2, path)
+
+    construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_2, len_sub_matrix_1)
     construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix_3,
-                               len(sub_matrix_1) + len(sub_matrix_2))
+                               len_sub_matrix_1 + len_sub_matrix_2)
+
+    sub_matrix_2 = []
+    sub_matrix_3 = []
+
+    os.remove(f'{path}/sub_mm_1.txt')
+    os.remove(f'{path}/sub_mm_2.txt')
+    os.remove(f'{path}/sub_mm_3.txt')
 
     """ ---- Calculating the polynomials corresponding to vector_i * Mac(F) (first sub matrix) ----"""
+
+    sub_matrix = []
+
+    with open(f'{path}/macaulay_matrix_1.txt', 'r') as file:
+        for line in file:
+            line = line.strip().strip('[]')
+            row = [int(x) for x in line.split(', ')]
+            sub_matrix.append(row)
+
+    os.remove(f'{path}/macaulay_matrix_1.txt')
+
+    sage_mm_sub_matrix_1 = Matrix(GF(2), sub_matrix)
 
     p_polynomials = []
     for i in range(len(null_space_basis)):

@@ -489,10 +489,12 @@ def sort_matrix_columns_by_dictionary(indexes_dictionary, matrix):
     return sorted_matrix
 
 
-def construct_first_sub_matrix(equations, monomials, num_variables, index_bin_dict, mon_bin_dict, bin_index_dict):
+def construct_first_sub_matrix_and_save_to_file(equations, monomials, num_variables, index_bin_dict, mon_bin_dict,
+                                                bin_index_dict, indexes_dictionary, sorted_monomials_deg_k, k):
     """
     Constructs the first sub matrix which is a sub matrix of the original Macaulay matrix
-    whose rows correspond to products u*f with deg_k(u) >= d-1.
+    whose rows correspond to products u*f with deg_k(u) >= d-1. Then, save it to a file instead of keeping in
+    operational memory,
     (d is hard coded as 1 for the entire implementation which means that the first sub matrix is the actual original
     Macaulay matrix but for the sake of efficiency we don't store both)
 
@@ -506,103 +508,70 @@ def construct_first_sub_matrix(equations, monomials, num_variables, index_bin_di
             of the monomial.
         bin_index_dict(dictionary): Dictionary with keys of binary representations of monomials and values of index
             of the corresponding monomial in an equation.
-
+        indexes_dictionary(dictionary): Dictionary of keys of indexes and values of corresponding indexes
+            by whom the positions of the values are switched and the matrix is being sorted.
+        sorted_monomials_deg_k(List[Monomial]): List of all the monomials of max. degree D sorted by deg_k.
+        k (int): The 'k' parameter
     Returns:
         List[List[int]]: The first sub matrix.
 
     """
+    path = f'../runs_data/run_n{num_variables}_k{k}'
     len_monomials = len(monomials)
-    mm_sub_matrix_1 = []
     max_degree_u = monomials[0].degree - 2
 
-    for mon in monomials[:-1]:
-        if mon.degree > max_degree_u:
-            continue
-        mon_bin = mon_bin_dict[str(mon)]
-        for e in equations:
-            line = [0] * len_monomials
-            for i in range(len_monomials - 1):
-                if e[i] == 1:
-                    result = ''
-                    current_mon_binary = index_bin_dict[i]
-                    for j in range(num_variables):
-                        result += str(int(mon_bin[j]) | int(current_mon_binary[j]))
-                    index = bin_index_dict[result]
+    tmp_counter = 0
+    for i in range(len(sorted_monomials_deg_k) - 1, -1, -1):
+        if deg_k(sorted_monomials_deg_k[i], k) > 1:
+            break
+        tmp_counter += 1
+
+    linear_separator = len(sorted_monomials_deg_k) - tmp_counter
+
+    with open(f'{path}/macaulay_matrix_1.txt', 'a') as sub_matrix_1_file, open(f'{path}/macaulay_matrix_2.txt',
+                                                                       'a') as sub_matrix_2_file:
+        for mon in monomials[:-1]:
+            if mon.degree > max_degree_u:
+                continue
+            mon_bin = mon_bin_dict[str(mon)]
+            for e in equations:
+                line = [0] * len_monomials
+                for i in range(len_monomials - 1):
+                    if e[i] == 1:
+                        result = ''
+                        current_mon_binary = index_bin_dict[i]
+                        for j in range(num_variables):
+                            result += str(int(mon_bin[j]) | int(current_mon_binary[j]))
+                        index = bin_index_dict[result]
+                        line[index] += 1
+                        line[index] %= 2
+                if e[-1] == 1:
+                    index = bin_index_dict[mon_bin]
                     line[index] += 1
                     line[index] %= 2
-            if e[-1] == 1:
-                index = bin_index_dict[mon_bin]
-                line[index] += 1
-                line[index] %= 2
-            mm_sub_matrix_1.append(line)
 
-    mm_sub_matrix_1.extend(equations)
-    return mm_sub_matrix_1
+                line_sorted = [0] * len(line)
+                for i in range(len(line)):
+                    if i in indexes_dictionary.keys():
+                        new_index = indexes_dictionary[i]
+                        line_sorted[new_index] = line[i]
+                    else:
+                        line_sorted[i] = line[i]
 
+                sub_matrix_2_file.write(str(line_sorted[:linear_separator]) + '\n')
+                sub_matrix_1_file.write(str(line_sorted[linear_separator:]) + '\n')
 
-def construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k):
-    """
-    Extracts the second sub matrix from the first sub matrix.
-    The second sub matrix contains the columns of the first sub matrix corresponding to monomials m with deg_k(m) > d.
+        for e in equations:
+            line_sorted = [0] * len(e)
+            for i in range(len(e)):
+                if i in indexes_dictionary.keys():
+                    new_index = indexes_dictionary[i]
+                    line_sorted[new_index] = e[i]
+                else:
+                    line_sorted[i] = e[i]
 
-    Parameters:
-        k (int): The 'k' parameter
-        mm_sub_matrix_1_sorted_deg_k (List[List[int]]): The first sub matrix represented as
-            list of lists of integers (matrix) and sorted by deg_k.
-        sorted_monomials_deg_k(List[Monomial]): List of all the monomials of max. degree D sorted by deg_k.
-
-    Returns:
-        List[List[int]]: The second sub matrix.
-    """
-    mm_sub_matrix_2_counter = 0
-    for m in sorted_monomials_deg_k:
-        if deg_k(m, k) <= 1:  # HARDCODED
-            break
-        mm_sub_matrix_2_counter += 1
-
-    mm_sub_matrix_2 = []
-    for m in mm_sub_matrix_1_sorted_deg_k:
-        mm_sub_matrix_2.append(m[:mm_sub_matrix_2_counter])
-
-    return mm_sub_matrix_2
-
-
-def extract_sub_matrix_degree_d(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomials_deg_k, d_start, d_end):
-    """
-    The extracted sub matrix contains the columns of the first sub matrix corresponding
-    to monomials m with deg_k(m) <= d_start and deg_k(m) >= d_end.
-
-    Parameters:
-        k (int): The 'k' parameter
-        mm_sub_matrix_1_sorted_deg_k (List[List[int]]): The first sub matrix represented as
-            list of lists of integers (matrix) and sorted by deg_k.
-        sorted_monomials_deg_k(List[Monomial]): List of all the monomials of max. degree D sorted by deg_k.
-        d_start (int): The starting degree (deg_k).
-        d_end (int): The ending degree (deg_k).
-    Returns:
-        List[List[int]]: The extracted sub matrix.
-    """
-
-    if d_start < d_end:
-        return
-
-    start = 0
-    finish = 0
-    for m in range(len(sorted_monomials_deg_k)):
-        if deg_k(sorted_monomials_deg_k[m], k) == d_start:
-            start = m
-            break
-
-    for m in range(len(sorted_monomials_deg_k) - 1, -1, -1):
-        if deg_k(sorted_monomials_deg_k[m], k) == d_end:
-            finish = m
-            break
-
-    extracted_sub_matrix = []
-    for m in mm_sub_matrix_1_sorted_deg_k:
-        extracted_sub_matrix.append(m[start:finish + 1])
-
-    return extracted_sub_matrix
+            sub_matrix_2_file.write(str(line_sorted[:linear_separator]) + '\n')
+            sub_matrix_1_file.write(str(line_sorted[linear_separator:]) + '\n')
 
 
 def get_size_of_mm(n, degree, m):
@@ -630,9 +599,9 @@ def get_size_of_mm(n, degree, m):
 
 def rref(matrix):
     """
-        Function that transforms a binary matrix into Reduced Row Echelon Form
-        Parameters:
-            matrix(List[List[int]]): The matrix that we want to transform
+    Function that transforms a binary matrix into Reduced Row Echelon Form
+    Parameters:
+        matrix(List[List[int]]): The matrix that we want to transform
     """
     rows, cols = len(matrix), len(matrix[0])
     lead = 0
@@ -655,21 +624,70 @@ def rref(matrix):
         lead += 1
 
 
-def transpose_matrix(matrix):
+def read_sub_matrix(sub_matrix, num, path):
     """
-        Function that transposes a matrix
+        Function that reads a sub matrix from a file.
         Parameters:
-            matrix(List[List[int]]): The matrix that we want to transpose
+            sub_matrix(): The sub matrix
+            num(int): The number of the sub matrix
+            path(String): Path to the current working directory
     """
-    return [[matrix[j][i] for j in range(len(matrix))] for i in range(len(matrix[0]))]
+    with open(f'{path}/sub_mm_{num}.txt', 'r') as file:
+        for line in file:
+            line = line.strip().strip('[]')
+            line = line.strip().strip(',')
+            row = [int(x) for x in line.split(', ')]
+            sub_matrix.append(row)
+
+
+def write_sub_matrix(sub_matrix, num, path):
+    """
+    Function that writes a sub matrix to a file.
+    Parameters:
+        sub_matrix(): The sub matrix
+        num(int): The number of the sub matrix
+        path(String): Path to the current working directory
+    """
+    with open(f'{path}/sub_mm_{num}.txt', 'w') as file:
+        for row in sub_matrix:
+            file.write(str(row) + '\n')
+
+
+def transpose_matrix_in_iterations(matrix_file, path):
+    """
+    Function that applies one matrix to another one using Gaussian Elimination
+    Parameters:
+        matrix_file(String): Name of the file where the matrix is stored
+        path(String): Path to the current working directory
+    """
+    temp_files = []
+    with open(f'{path}/{matrix_file}', 'r') as f:
+        for row_index, line in enumerate(f):
+            line = line.strip().strip('[]')
+            row = [int(x) for x in line.split(',')]
+
+            temp_files.append(f'{path}/tmp_{row_index}')
+
+            with open(f'{path}/tmp_{row_index}', 'w') as tmp_file:
+                for element in row:
+                    tmp_file.write(str(element) + ', \n')
+
+    with open(f'{path}/transposed_mm.txt', 'w') as out_f:
+        temp_files = [open(f'{path}/tmp_{i}', 'r') for i in range(len(temp_files))]
+        for col_line in zip(*temp_files):
+            out_f.write(' '.join(line.strip() for line in col_line) + '\n')
+
+    for file in temp_files:
+        file.close()
+        os.remove(file.name)
 
 
 def apply_matrix(matrix_to_apply, matrix_to_be_applied_on):
     """
-        Function that applies one matrix to another one using Gaussian Elimination
-        Parameters:
-            matrix_to_apply(List[List[int]]): The matrix we are applying
-            matrix_to_be_applied_on(List[List[int]]): The matrix that we want to apply the changes to
+    Function that applies one matrix to another one using Gaussian Elimination
+    Parameters:
+        matrix_to_apply(List[List[int]]): The matrix we are applying
+        matrix_to_be_applied_on(List[List[int]]): The matrix that we want to apply the changes to
     """
     for row in matrix_to_apply:
         pivot = -1
