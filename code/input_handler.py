@@ -14,6 +14,7 @@ def parse_input(n, m):
         eq(List[List[int]]): Equations from the input.
         answer(List[int]): The answer of the example.
     """
+
     file_path = f'../example_input/auto_generated/example_n{n}_m{m}'
 
     input_list = []

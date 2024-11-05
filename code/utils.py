@@ -63,6 +63,7 @@ def generate_monomials_types(degree, k, num_variables):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     monomials = generate_monomials(num_variables, 2)
     monomials_degree_d = generate_monomials(num_variables, degree)
     monomials_fukuoka_mq_challenge = generate_monomials_fukuoka_format(num_variables, 2)
@@ -82,6 +83,7 @@ def generate_monomials(num_variables, degree):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     var = []
     for i in range(1, num_variables + 1):
         var.append('x' + str(i))
@@ -124,6 +126,7 @@ def generate_monomials_fukuoka_format(num_variables, degree):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     var = []
     for i in range(1, num_variables + 1):
         var.append('x' + str(i))
@@ -169,6 +172,7 @@ def sort_deg_k_grevlex(monomials, k):
     Returns:
         List[Monomial]: The sorted monomials
     """
+
     grevlex = cmp_to_key(sort_monomial_grevlex)
 
     one = False
@@ -195,6 +199,7 @@ def sort_monomial_variables(variables):
     Parameters:
         variables(List[string]): The list of variables
     """
+
     variables.sort(key=lambda variable: int(variable[1:]))
 
 
@@ -205,6 +210,7 @@ def sort_grevlex(list_to_sort):
     Parameters:
         list_to_sort(List[tuple(string)]): The list of monomials(represented as tuples of strings-variables).
     """
+
     one = False
     if list_to_sort[0] == tuple(''):
         one = True
@@ -227,6 +233,7 @@ def sort_monomial_grevlex(monomial_1, monomial_2):
     Returns:
         int: 1 if monomial_1 > monomial_2, -1 if monomial_1 < monomial_2, 0 otherwise
     """
+
     len_mon_1 = len(monomial_1)
     len_mon_2 = len(monomial_2)
 
@@ -252,6 +259,7 @@ def deg_k(monomial, k):
     Returns:
         int: The deg_k degree of the monomial
     """
+
     degree = 0
 
     for v in monomial.variables:
@@ -267,12 +275,13 @@ def deg_k(monomial, k):
 
 def add_leading_zeros(equations, len_monomials):
     """
-        Adds leading zeros to the equations depending on the desired length.
+    Adds leading zeros to the equations depending on the desired length.
 
-        Parameters:
-            equations(List[List[int]]): The list of equations. Each equation is represented as a list of integers.
-            len_monomials(int): The desired length of the equations
+    Parameters:
+        equations(List[List[int]]): The list of equations. Each equation is represented as a list of integers.
+        len_monomials(int): The desired length of the equations
     """
+
     tmp_zeros = [0] * len_monomials
     for e in equations:
         e.reverse()
@@ -290,6 +299,7 @@ def generate_variables(num_variables):
     Returns:
         List[string]: List of variables
     """
+
     variables = []
     for i in range(num_variables):
         variables.append(f'x{i + 1}')
@@ -305,6 +315,7 @@ def format_equations_fukuoka(equations, monomials_fukuoka_mq_challenge):
         equations(List[List[int]]): The equations we are formatting. Each equation is represented as a list of integers.
         monomials_fukuoka_mq_challenge(List[Monomial]): The monomials corresponding to the Fukuoka MQ Challenge format
     """
+
     len_monomials_fukuoka_challenge = len(monomials_fukuoka_mq_challenge)
     positions_dict = {}
     indexes_to_remove = []
@@ -337,6 +348,7 @@ def check_consistency(system_polynomials):
     Returns:
         Boolean: True if the system is consistent, otherwise False
     """
+
     for s in system_polynomials:
         if all(x == 0 for x in s[:-1]) and s[-1] == 1:
             return False
@@ -363,6 +375,7 @@ def solve_linear_system(k, solution, system_polynomials, num_variables, answer):
     Raises:
         ValueError: If system is unsolvable.
     """
+
     if not check_consistency(system_polynomials):
         return
 
@@ -431,6 +444,7 @@ def construct_dictionaries(monomials, sorted_monomials_deg_k, num_variables):
     Returns:
         All the constructed dictionaries
     """
+
     len_monomials = len(monomials)
     mon_bin_dict = {}
     for mon in monomials[:-1]:
@@ -512,10 +526,12 @@ def construct_first_sub_matrix_and_save_to_file(equations, monomials, num_variab
             by whom the positions of the values are switched and the matrix is being sorted.
         sorted_monomials_deg_k(List[Monomial]): List of all the monomials of max. degree D sorted by deg_k.
         k (int): The 'k' parameter
+
     Returns:
         List[List[int]]: The first sub matrix.
 
     """
+
     path = f'../runs_data/run_n{num_variables}_k{k}'
     len_monomials = len(monomials)
     max_degree_u = monomials[0].degree - 2
@@ -529,7 +545,7 @@ def construct_first_sub_matrix_and_save_to_file(equations, monomials, num_variab
     linear_separator = len(sorted_monomials_deg_k) - tmp_counter
 
     with open(f'{path}/macaulay_matrix_1.txt', 'a') as sub_matrix_1_file, open(f'{path}/macaulay_matrix_2.txt',
-                                                                       'a') as sub_matrix_2_file:
+                                                                               'a') as sub_matrix_2_file:
         for mon in monomials[:-1]:
             if mon.degree > max_degree_u:
                 continue
@@ -583,6 +599,7 @@ def get_size_of_mm(n, degree, m):
         degree(int): Degree of the Macaulay matrix.
         m(int): Number of equations.
     """
+
     num_cols = 0
     for i in range(degree, -1, -1):
         num_cols += math.comb(n, i)
@@ -600,9 +617,11 @@ def get_size_of_mm(n, degree, m):
 def rref(matrix):
     """
     Function that transforms a binary matrix into Reduced Row Echelon Form
+
     Parameters:
         matrix(List[List[int]]): The matrix that we want to transform
     """
+
     rows, cols = len(matrix), len(matrix[0])
     lead = 0
     for r in range(rows):
@@ -626,12 +645,14 @@ def rref(matrix):
 
 def read_sub_matrix(sub_matrix, num, path):
     """
-        Function that reads a sub matrix from a file.
-        Parameters:
-            sub_matrix(): The sub matrix
-            num(int): The number of the sub matrix
-            path(String): Path to the current working directory
+    Function that reads a sub matrix from a file.
+
+    Parameters:
+        sub_matrix(): The sub matrix
+        num(int): The number of the sub matrix
+        path(String): Path to the current working directory
     """
+
     with open(f'{path}/sub_mm_{num}.txt', 'r') as file:
         for line in file:
             line = line.strip().strip('[]')
@@ -643,11 +664,13 @@ def read_sub_matrix(sub_matrix, num, path):
 def write_sub_matrix(sub_matrix, num, path):
     """
     Function that writes a sub matrix to a file.
+
     Parameters:
         sub_matrix(): The sub matrix
         num(int): The number of the sub matrix
         path(String): Path to the current working directory
     """
+
     with open(f'{path}/sub_mm_{num}.txt', 'w') as file:
         for row in sub_matrix:
             file.write(str(row) + '\n')
@@ -656,10 +679,12 @@ def write_sub_matrix(sub_matrix, num, path):
 def transpose_matrix_in_iterations(matrix_file, path):
     """
     Function that applies one matrix to another one using Gaussian Elimination
+
     Parameters:
         matrix_file(String): Name of the file where the matrix is stored
         path(String): Path to the current working directory
     """
+
     temp_files = []
     with open(f'{path}/{matrix_file}', 'r') as f:
         for row_index, line in enumerate(f):
@@ -685,10 +710,12 @@ def transpose_matrix_in_iterations(matrix_file, path):
 def apply_matrix(matrix_to_apply, matrix_to_be_applied_on):
     """
     Function that applies one matrix to another one using Gaussian Elimination
+
     Parameters:
         matrix_to_apply(List[List[int]]): The matrix we are applying
         matrix_to_be_applied_on(List[List[int]]): The matrix that we want to apply the changes to
     """
+
     for row in matrix_to_apply:
         pivot = -1
         for p in range(len(row)):
@@ -703,13 +730,15 @@ def apply_matrix(matrix_to_apply, matrix_to_be_applied_on):
 
 def find_and_swap_missing_pivot(reduced_sub_matrix, other_sub_matrix, starting_column=0):
     """
-        Finds and swaps missing pivot rows from one sub matrix to another
-        Parameters:
-            reduced_sub_matrix(List[List[int]]): The main sub matrix who has missing pivot rows
-            other_sub_matrix(List[List[int]]): The other sub matrix from whom
-                we get the rows we need in the main sub matrix
-            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+    Finds and swaps missing pivot rows from one sub matrix to another
+
+    Parameters:
+        reduced_sub_matrix(List[List[int]]): The main sub matrix who has missing pivot rows
+        other_sub_matrix(List[List[int]]): The other sub matrix from whom
+            we get the rows we need in the main sub matrix
+        starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
     """
+
     rows_reduced = len(reduced_sub_matrix)
     columns_reduced = len(reduced_sub_matrix[0])
     rows_other = len(other_sub_matrix)
@@ -730,14 +759,17 @@ def find_and_swap_missing_pivot(reduced_sub_matrix, other_sub_matrix, starting_c
 
 def check_rref(matrix, starting_column=0):
     """
-        Check if a matrix is in a Reduced Row Echelon Form
-        * It is used only for the first 2 sub matrices (may not be always correct)
-        Parameters:
-            matrix(List[List[int]]): The sub matrix
-            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
-        Returns:
-            bool: True if the matrix is in Reduced Row Echelon Form, false otherwise
+    Check if a matrix is in a Reduced Row Echelon Form
+    * It is used only for the first 2 sub matrices (may not be always correct)
+
+    Parameters:
+        matrix(List[List[int]]): The sub matrix
+        starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+
+    Returns:
+        bool: True if the matrix is in Reduced Row Echelon Form, false otherwise
     """
+
     rows = len(matrix)
     columns = len(matrix[0])
 
@@ -754,12 +786,14 @@ def check_rref(matrix, starting_column=0):
 
 def get_pivots(sub_matrix, pivots, starting_column):
     """
-        Extracts the indexes of the pivots from a sub matrix and adds them to the pivots list
-        Parameters:
-            sub_matrix(List[List[int]]): The sub matrix
-            pivots(List[int]): Indexes of the pivots
-            starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
+    Extracts the indexes of the pivots from a sub matrix and adds them to the pivots list
+
+    Parameters:
+        sub_matrix(List[List[int]]): The sub matrix
+        pivots(List[int]): Indexes of the pivots
+        starting_column(int): Starting column of the sub matrix considering it's not the whole matrix
     """
+
     rows, cols = len(sub_matrix), len(sub_matrix[0])
 
     for r in range(rows):
@@ -771,14 +805,16 @@ def get_pivots(sub_matrix, pivots, starting_column):
 
 def construct_null_space_basis(null_space_basis, free_vars, pivots, sub_matrix, starting_row=0):
     """
-        Constructs the null space basis of a matrix in many iterations using sub matrices
-        Parameters:
-            null_space_basis(List[List[int]]): The null space basis
-            free_vars(List[int]): Indexes of free variables
-            pivots(List[int]): Indexes of the pivots
-            sub_matrix(List[List[int]]): The sub matrix
-            starting_row(int): Starting row of the sub matrix considering it's not the whole matrix
+    Constructs the null space basis of a matrix in many iterations using sub matrices
+
+    Parameters:
+        null_space_basis(List[List[int]]): The null space basis
+        free_vars(List[int]): Indexes of free variables
+        pivots(List[int]): Indexes of the pivots
+        sub_matrix(List[List[int]]): The sub matrix
+        starting_row(int): Starting row of the sub matrix considering it's not the whole matrix
     """
+
     for index, free_var in enumerate(free_vars):
         null_vector = null_space_basis[index]
         for r in range(len(sub_matrix)):
