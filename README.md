@@ -12,12 +12,11 @@ The general steps of the algorithm are given in this pseudo code from the paper:
 Clone the repo:
 ```bash
 git clone https://github.com/JovanSimonoski/CrossbredAlgorithm.git
-cd CrossbredAlgorithm
-cd code
+cd CrossbredAlgorithm/code
 ```
 To execute the algorithm, use the following example command:
 ```bash
-sage main.py -n 10 -m 20 -k 5 -D 2
+sage run_crossbred.py -n 10 -m 20 -k 5 -D 2
 ```
 The arguments for the program are: 
   - the number of variables 'n', 
