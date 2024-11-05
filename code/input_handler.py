@@ -14,6 +14,7 @@ def parse_input(n, m):
         eq(List[List[int]]): Equations from the input.
         answer(List[int]): The answer of the example.
     """
+
     file_path = f'../example_input/auto_generated/example_n{n}_m{m}'
 
     input_list = []
@@ -30,8 +31,6 @@ def parse_input(n, m):
     for line in input_values:
         values.append(line.split(':')[-1].strip())
 
-    # variables = ['galois_field', 'num_variables', 'num_equations', 'seed', 'order']
-    # var_val = dict(zip(variables, values))
     eq = [list(map(int, line.strip(' ;').split())) for line in input_equations]
 
     answer_tmp = []

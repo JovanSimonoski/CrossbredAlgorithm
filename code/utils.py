@@ -63,6 +63,7 @@ def generate_monomials_types(degree, k, num_variables):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     monomials = generate_monomials(num_variables, 2)
     monomials_degree_d = generate_monomials(num_variables, degree)
     monomials_fukuoka_mq_challenge = generate_monomials_fukuoka_format(num_variables, 2)
@@ -82,6 +83,7 @@ def generate_monomials(num_variables, degree):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     var = []
     for i in range(1, num_variables + 1):
         var.append('x' + str(i))
@@ -124,6 +126,7 @@ def generate_monomials_fukuoka_format(num_variables, degree):
     Returns:
         List[Monomial]: The generated monomials
     """
+
     var = []
     for i in range(1, num_variables + 1):
         var.append('x' + str(i))
@@ -169,6 +172,7 @@ def sort_deg_k_grevlex(monomials, k):
     Returns:
         List[Monomial]: The sorted monomials
     """
+
     grevlex = cmp_to_key(sort_monomial_grevlex)
 
     one = False
@@ -195,6 +199,7 @@ def sort_monomial_variables(variables):
     Parameters:
         variables(List[string]): The list of variables
     """
+
     variables.sort(key=lambda variable: int(variable[1:]))
 
 
@@ -205,6 +210,7 @@ def sort_grevlex(list_to_sort):
     Parameters:
         list_to_sort(List[tuple(string)]): The list of monomials(represented as tuples of strings-variables).
     """
+
     one = False
     if list_to_sort[0] == tuple(''):
         one = True
@@ -227,6 +233,7 @@ def sort_monomial_grevlex(monomial_1, monomial_2):
     Returns:
         int: 1 if monomial_1 > monomial_2, -1 if monomial_1 < monomial_2, 0 otherwise
     """
+
     len_mon_1 = len(monomial_1)
     len_mon_2 = len(monomial_2)
 
@@ -252,6 +259,7 @@ def deg_k(monomial, k):
     Returns:
         int: The deg_k degree of the monomial
     """
+
     degree = 0
 
     for v in monomial.variables:
@@ -267,12 +275,13 @@ def deg_k(monomial, k):
 
 def add_leading_zeros(equations, len_monomials):
     """
-        Adds leading zeros to the equations depending on the desired length.
+    Adds leading zeros to the equations depending on the desired length.
 
-        Parameters:
-            equations(List[List[int]]): The list of equations. Each equation is represented as a list of integers.
-            len_monomials(int): The desired length of the equations
+    Parameters:
+        equations(List[List[int]]): The list of equations. Each equation is represented as a list of integers.
+        len_monomials(int): The desired length of the equations
     """
+
     tmp_zeros = [0] * len_monomials
     for e in equations:
         e.reverse()
@@ -290,6 +299,7 @@ def generate_variables(num_variables):
     Returns:
         List[string]: List of variables
     """
+
     variables = []
     for i in range(num_variables):
         variables.append(f'x{i + 1}')
@@ -305,6 +315,7 @@ def format_equations_fukuoka(equations, monomials_fukuoka_mq_challenge):
         equations(List[List[int]]): The equations we are formatting. Each equation is represented as a list of integers.
         monomials_fukuoka_mq_challenge(List[Monomial]): The monomials corresponding to the Fukuoka MQ Challenge format
     """
+
     len_monomials_fukuoka_challenge = len(monomials_fukuoka_mq_challenge)
     positions_dict = {}
     indexes_to_remove = []
@@ -337,6 +348,7 @@ def check_consistency(system_polynomials):
     Returns:
         Boolean: True if the system is consistent, otherwise False
     """
+
     for s in system_polynomials:
         if all(x == 0 for x in s[:-1]) and s[-1] == 1:
             return False
@@ -363,6 +375,7 @@ def solve_linear_system(k, solution, system_polynomials, num_variables, answer):
     Raises:
         ValueError: If system is unsolvable.
     """
+
     if not check_consistency(system_polynomials):
         return
 
@@ -431,6 +444,7 @@ def construct_dictionaries(monomials, sorted_monomials_deg_k, num_variables):
     Returns:
         All the constructed dictionaries
     """
+
     len_monomials = len(monomials)
     mon_bin_dict = {}
     for mon in monomials[:-1]:
@@ -509,8 +523,8 @@ def construct_first_sub_matrix(equations, monomials, num_variables, index_bin_di
 
     Returns:
         List[List[int]]: The first sub matrix.
-
     """
+
     len_monomials = len(monomials)
     mm_sub_matrix_1 = []
     max_degree_u = monomials[0].degree - 2
@@ -554,6 +568,7 @@ def construct_second_sub_matrix(k, mm_sub_matrix_1_sorted_deg_k, sorted_monomial
     Returns:
         List[List[int]]: The second sub matrix.
     """
+
     mm_sub_matrix_2_counter = 0
     for m in sorted_monomials_deg_k:
         if deg_k(m, k) <= 1:  # HARDCODED
@@ -614,6 +629,7 @@ def get_size_of_mm(n, m, degree):
         m(int): Number of equations.
         degree(int): Degree of the Macaulay matrix.
     """
+
     num_cols = 0
     for i in range(degree, -1, -1):
         num_cols += math.comb(n, i)

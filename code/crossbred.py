@@ -28,6 +28,7 @@ def crossbred(num_variables, degree, k, equations, answer):
         answer(List[int]): The actual answer to the example,
             derived from the Fukuoka MQ Challenge input (the answer file).
     """
+
     monomials, monomials_degree_d, monomials_fukuoka_mq_challenge, sorted_monomials_deg_k = generate_monomials_types(
         degree, k, num_variables)
 
